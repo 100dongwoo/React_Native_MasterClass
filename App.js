@@ -11,7 +11,9 @@ import {
 } from '@react-navigation/native';
 import Tabs from './navigation/Tabs';
 import Stack from './navigation/Stack';
-
+import Root from './navigation/Root';
+import { ThemeProvider } from 'styled-components/native';
+import { darkTheme, lightTheme } from './styled';
 const loadFonts = (fonts) => fonts.map((font) => Font.loadAsync(font));
 
 const loadImages = (images) =>
@@ -47,9 +49,11 @@ export default function App() {
         );
     }
     return (
-        <NavigationContainer theme={isDark ? DarkTheme : DefaultTheme}>
-            {/*<Tabs />*/}
-            <Stack />
-        </NavigationContainer>
+        <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+            <NavigationContainer>
+                <Root />
+                {/*<Stack />*/}
+            </NavigationContainer>
+        </ThemeProvider>
     );
 }
