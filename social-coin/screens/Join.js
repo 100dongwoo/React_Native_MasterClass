@@ -1,6 +1,9 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components/native';
 import { BLACK_COLOR } from '../colors';
+import auth from '@react-native-firebase/auth';
+import { Alert } from 'react-native';
+import { ActivityIndicator } from 'react-native-web';
 
 const Container = styled.View`
     background-color: ${BLACK_COLOR};
@@ -36,9 +39,34 @@ const Join = () => {
     const passwordInput = useRef();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const onSubmitEditing = () => {
+    const [loading, setLoading] = useState(false);
+
+    const onSubmitEmailEditing = () => {
         passwordInput.current.focus();
     };
+    const onSubmitPasswordEditing = async () => {
+        if (email === '' || password === '') {
+            Alert.alert('작성해주세요');
+            return;
+        }
+        if (loading) {
+            return;
+        }
+        setLoading(true);
+        try {
+            // await auth().signInWithEmailAndPassword()
+            await auth().createUserWithEmailAndPassword(email, password);
+        } catch (e) {
+            switch (e.code) {
+                case 'auth/weak-password': {
+                    Alert.alert('Write a stronger password!');
+                }
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <Container>
             <TextInput
@@ -47,11 +75,11 @@ const Join = () => {
                 autoCorrect={false} //자동 수정
                 keyboardType='email-address'
                 value={email}
-                returnKeyType='next' //ios
+                returnKeyType='next' //ios   다음 버튼 단어
                 // returnKeyLabel  android
 
                 onChangeText={(text) => setEmail(text)}
-                onSubmitEditing={onSubmitEditing} //finish 하고싶을때 부르는 함수
+                onSubmitEditing={onSubmitEmailEditing} //finish 하고싶을때 부르는 함수
                 placeholderTextColor={'rgba(255, 255, 255, 0.7)'}
             />
             <TextInput
@@ -62,9 +90,14 @@ const Join = () => {
                 returnKeyType='done'
                 onChangeText={(text) => setPassword(text)}
                 placeholderTextColor={'rgba(255, 255, 255, 0.7)'}
+                onSubmitEditing={onSubmitPasswordEditing}
             />
-            <Btn>
-                <BtnText>Create Account</BtnText>
+            <Btn onPress={onSubmitPasswordEditing}>
+                {loading ? (
+                    <ActivityIndicator color={'white'} />
+                ) : (
+                    <BtnText>Create Account</BtnText>
+                )}
             </Btn>
         </Container>
     );
